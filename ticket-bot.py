@@ -1,14 +1,20 @@
 
+import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from send_email import send_email
+from keys import RECEIVER_EMAIL
+from send_sms import send_text
+
 # CONSTANTS
 STUBHUB_URL = "https://www.stubhub.com/big-east-basketball-tournament-new-york-tickets-3-15-2025/event/154773723/?qid=45d39957b59c4a1f049e0c527d6382ba&iid=0e0336c9-3d42-4dfb-a365-0ed277475647&index=stubhub&ut=1c09179ef2a3b28e81530ebab681e57503c0b578&quantity=3"
-
 TICKET_X_PATHS = {
     "ticket_price": '//*[@id="listings-container"]/div[1]/div/div[2]/div/div[1]/div[2]/div[1]', # ticket price
     "ticket_rating": '//*[@id="listings-container"]/div[1]/div/div[2]/div/div[1]/div[2]/div[2]/div/div/div/div[1]' # rating of the tickets
 }
+EMAIL_SUB = "Ticket Prices for the Big East Championship Have Dropped"
+PRICE_THRESHOLD = 80
 
 
 # general function for retrieving ticket info 
@@ -24,37 +30,34 @@ def get_ticket_info(url, xPaths):
 
     # find the xPath values
     for key, element in xPaths.items():
-        retrieved = driver.find_element(By.XPATH, element)
-        data[key] = retrieved.get_attribute('innerHTML')
-    
+        try:
+            retrieved = driver.find_element(By.XPATH, element)
+            data[key] = retrieved.get_attribute('innerHTML')
+        except Exception as e:
+            logging.error(f"Error finding element {key}: {e}")
+        
     driver.quit()
-    print('DATA: ', data)
+    
+    if len(data.keys()):
+        if int(data['ticket_price'].replace("$", "")) <= PRICE_THRESHOLD:
+            notify_price_drop(data)
     
 
 
-def notify_price_drop():
-    print("a new func")
+# Send notification email if ticket price is below price target
+def notify_price_drop(ticketInfo):
+    global email_sent  
 
+    subject = EMAIL_SUB
+    body = f"Big East Championship ticket prices have dropped below ${PRICE_THRESHOLD}. The available tickets are now selling at {ticketInfo['ticket_price']} with a stubhub rating of {ticketInfo['ticket_rating']}. Get them now here: {STUBHUB_URL}!"
 
-# Function send_email_notification(spots, date, url):
-#     For each phone number
-#         Send a text with the link to buy
+    try:
+        send_email(RECEIVER_EMAIL, subject, body)
+        email_sent = True  # Set flag to true after email is sent
 
-# Function main(args):
-#     Schedule the permit check to run periodically
+    except Exception as e:
+        logging.error(f"Failed to send notification email: {e}")
 
-#     While True:
-#         Run scheduled permit check
-#         Wait for a short time to not overwork computer
-#         If an email was sent:
-#             Exit the loop
-
-# if __name__=='__main__':
-#     Read the configuration file
-#     Set up email details
-#     Initialize logging
-#     Initialize email_sent flag
-#     Call main function with arguments
 
 
 get_ticket_info(STUBHUB_URL, TICKET_X_PATHS)
