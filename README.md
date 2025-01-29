@@ -13,10 +13,10 @@ An in-depth paragraph about your project and overview of use.
 
 
 ### Built With
-* [![Python][Python][Python-url]]
-* [![Selenium][Selenium][Selenium-url]]
-* [![Twilio][Twilio][Twilio-url]]
-* [![stmplib][stmplib][stmplib-url]]
+* [![Python][Python]][Python-url]
+* [![Selenium][Selenium]][Selenium-url]
+* [![Twilio][Twilio]][Twilio-url]
+* [![stmplib][stmplib]][stmplib-url]
 
 
 ## Getting Started
