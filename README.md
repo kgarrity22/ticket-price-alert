@@ -1,4 +1,4 @@
-# Price Check Ticket Bot 🎟
+# Ticket Price Alert Bot 🎟
 
 Automated Stubhub ticket price checking with python & selenium
 
